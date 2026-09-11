@@ -1,0 +1,1116 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#102a43"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png">
+<title>Kee Reminder</title>
+<style>
+:root{--bg:#f5f7fa;--surface:#fff;--navy:#102a43;--blue:#1769e0;--mint:#7fe7c4;--muted:#6b7f93;--line:#e4e9ef;--danger:#c83c3c;--pink:#e0507a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;min-height:100%;background:var(--bg);color:var(--navy);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{overscroll-behavior:none}.app{width:100%;max-width:480px;min-height:100vh;margin:auto;background:var(--bg);padding:0 16px 92px}
+.page{display:none}.page.active{display:block}
+.appbar{position:sticky;top:0;z-index:10;background:rgba(245,247,250,.94);backdrop-filter:blur(12px);padding:16px 0 12px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}.logo{width:42px;height:42px;border-radius:12px}.brand h1{font-size:20px;line-height:1;margin:0}.brand p{font-size:11px;color:var(--muted);margin:4px 0 0}
+.icon-btn{width:42px;height:42px;border-radius:13px;background:#fff;border:1px solid var(--line);font-size:18px}
+.hero{background:linear-gradient(135deg,#102a43,#1769e0);color:#fff;border-radius:22px;padding:20px;margin:5px 0 14px;box-shadow:0 10px 26px #102a4320}
+.hero.pink{background:linear-gradient(135deg,#7a1f43,var(--pink));box-shadow:0 10px 26px #e0507a30}
+.hero-row{display:flex;justify-content:space-between;align-items:center}.hero .big{font-size:38px;font-weight:850;line-height:1}.hero .label{font-size:12px;opacity:.82;margin-top:4px}.hero-date{font-size:12px;opacity:.9;text-align:right}.progress{height:7px;background:#ffffff38;border-radius:99px;margin-top:16px}.bar{height:100%;width:0;background:#fff;border-radius:99px}
+.add-main{width:100%;height:52px;border:0;border-radius:16px;background:var(--blue);color:#fff;font-weight:800;font-size:15px;box-shadow:0 8px 18px #1769e033;margin-bottom:11px}
+.add-main.pink{background:var(--pink);box-shadow:0 8px 18px #e0507a33}
+.quick{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;margin-bottom:12px}.quick-title{font-size:12px;font-weight:800;margin-bottom:9px}.chips{display:flex;gap:7px;overflow:auto}
+.chip{white-space:nowrap;border:1px solid #d9e7fb;background:#f3f7fd;color:#245b9e;border-radius:99px;padding:8px 10px;font-size:11px;font-weight:700;position:relative;display:inline-flex;align-items:center;gap:6px}
+.check.done.green{background:#2f9e6a;border-color:#2f9e6a}
+.streak{font-size:10px;background:#e7f7ef;color:#1f7a4d;border-radius:99px;padding:2px 7px;font-weight:800;margin-left:6px}
+.chip .x{background:#e0507a;color:#fff;border-radius:50%;width:15px;height:15px;font-size:10px;line-height:15px;text-align:center;font-weight:900}
+.chip.add{background:#eef3f8;color:var(--blue);border-style:dashed}
+.filters{display:flex;gap:7px;overflow:auto;margin:5px 0 12px}.filter{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:99px;padding:8px 13px;font-size:12px;font-weight:750;white-space:nowrap}.filter.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:13px;margin-bottom:12px}
+.section-title{font-size:13px;font-weight:850;margin-bottom:5px}.small{font-size:11px;color:var(--muted);line-height:1.45}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}.stat .n{font-size:20px;font-weight:850}.stat .l{font-size:11px;color:var(--muted);margin-top:2px}
+.advice{background:#fff2f6;border:1px solid #f6c9d7}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.cal-head .icon{font-size:18px;font-weight:900;padding:4px 10px;background:#f3f5f8;border-radius:10px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal-grid .wd{font-size:10px;color:var(--muted);font-weight:800;padding:4px 0}
+.cal-day{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:10px;color:var(--navy)}
+.cal-day.pad{visibility:hidden}
+.cal-day.logged{background:var(--pink);color:#fff;font-weight:800}
+.cal-day.predicted{border:2px dashed var(--pink);font-weight:800;color:var(--pink)}
+.cal-day.today:not(.logged){box-shadow:inset 0 0 0 2px var(--navy)}
+.cal-legend{display:flex;gap:14px;margin-top:10px;font-size:10px;color:var(--muted)}.cal-legend span{display:flex;align-items:center;gap:5px}.dot{width:10px;height:10px;border-radius:4px;display:inline-block}.dot.logged{background:var(--pink)}.dot.predicted{border:2px dashed var(--pink)}
+.task{display:grid;grid-template-columns:25px 1fr auto;gap:11px;align-items:start;padding:14px 2px;border-bottom:1px solid #edf0f4}.task:last-child{border-bottom:0}.check{width:24px;height:24px;border:2px solid #a9b8c7;border-radius:8px;cursor:pointer}.check.done{background:var(--blue);border-color:var(--blue);position:relative}.check.done:after{content:"✓";position:absolute;left:4px;top:-2px;color:#fff;font-size:16px;font-weight:900}.title{font-size:14px;font-weight:750;line-height:1.3}.title.done{text-decoration:line-through;color:#8293a4}.meta{font-size:11px;color:var(--muted);margin-top:5px}.late{color:#b42318;font-weight:800}.acts{display:flex;gap:1px}.icon{background:none;border:0;padding:5px;font-size:15px;color:#74879a}
+.entry{display:grid;grid-template-columns:1fr auto;gap:11px;align-items:center;padding:12px 2px;border-bottom:1px solid #edf0f4}.entry:last-child{border-bottom:0}.entry .d{font-size:14px;font-weight:750}.entry .m{font-size:11px;color:var(--muted);margin-top:3px}
+.empty{text-align:center;padding:32px 10px;color:var(--muted);font-size:12px}.empty b{display:block;color:var(--navy);font-size:14px;margin-bottom:5px}
+.reminder{display:flex;align-items:center;gap:10px}.bell{width:38px;height:38px;border-radius:12px;background:#eef5ff;display:grid;place-items:center;font-size:18px}.reminder-copy{flex:1}.reminder button{margin-top:8px}
+.primary{background:var(--blue);color:#fff}.primary.pink{background:var(--pink)}.ghost{background:#eef3f8;color:var(--navy)}button{font:inherit;border:0;border-radius:12px;padding:10px 12px;font-weight:750}
+.modal{position:fixed;inset:0;background:#102a4370;display:none;align-items:flex-end;justify-content:center;z-index:30;padding:10px}.sheet{background:#fff;width:min(480px,100%);border-radius:22px 22px 14px 14px;padding:18px;max-height:90vh;overflow:auto}.sheet h2{font-size:20px;margin:0 0 15px}.grid{display:grid;gap:10px}.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}input,select{font:inherit;width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);outline:none}.repeat{display:grid;grid-template-columns:1fr 1fr;gap:7px}.repeat button{background:#eef3f8;color:var(--muted)}.repeat button.active{background:var(--navy);color:#fff}
+.emergency-toggle{width:100%;padding:12px;border-radius:12px;border:2px solid #f3caca;background:#fdf1f1;color:#b42318;font-weight:800;font-size:13px}.emergency-toggle.active{background:#c83c3c;border-color:#c83c3c;color:#fff}
+.task.emergency{border:1.5px solid #f3caca;background:#fff8f8}.emergency-badge{display:inline-block;background:#c83c3c;color:#fff;font-size:9px;font-weight:800;border-radius:6px;padding:2px 6px;margin-right:5px;vertical-align:middle}
+.footer-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#ffffffee;backdrop-filter:blur(14px);border-top:1px solid var(--line);z-index:20}.footer-inner{height:52px;border-radius:17px;background:#fff;display:flex;align-items:stretch;justify-content:center;border:1px solid var(--line);box-shadow:0 -3px 15px #102a4308;overflow:hidden}.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;color:var(--muted);font-size:10px;font-weight:750;border-radius:0;padding:0}.nav-item span{font-size:17px}.nav-item.active{color:var(--blue)}.nav-item.active.pink-active{color:var(--pink)}.nav-item.active.green-active{color:#2f9e6a}
+@media(min-width:700px){body{background:#dfe6ee}.app{box-shadow:0 0 45px #102a4320}}
+.install-banner{display:none;background:#102a43;color:#fff;border-radius:18px;padding:13px 14px;margin:4px 0 12px;align-items:center;gap:10px;box-shadow:0 8px 22px #102a4320}.install-banner.show{display:flex}.install-copy{flex:1}.install-copy b{font-size:13px}.install-copy span{display:block;font-size:10px;opacity:.78;margin-top:2px}.install-now{background:#7fe7c4;color:#102a43;padding:9px 12px;border-radius:11px;font-size:12px}.install-close{background:transparent;color:#fff;padding:5px;font-size:17px}
+.tips-card{display:none}
+.trend-bar{flex:1;background:#f0d3dd;border-radius:5px 5px 2px 2px;min-height:4px;position:relative}
+.trend-bar.avg{background:var(--pink)}
+.trend-bar .lbl{position:absolute;top:-15px;left:0;right:0;text-align:center;font-size:9px;color:var(--muted)}
+.cal-day.fertile{border:2px dashed #6fb3e0;color:#1769e0}
+
+/* ===== Monthly habit calendar + Art Gallery ===== */
+.month-head{display:flex;align-items:center;justify-content:space-between;margin:4px 0 10px}
+.month-head .month-name{font-size:17px;font-weight:850}.month-nav{display:flex;gap:6px}
+.month-nav button{width:38px;height:38px;padding:0;background:#fff;border:1px solid var(--line);font-size:20px;color:var(--navy)}
+.habit-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.hstat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.hstat .n{font-size:18px;font-weight:850}.hstat .l{font-size:10px;color:var(--muted)}
+.habit-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px;margin-bottom:11px}
+.habit-top{display:flex;align-items:center;gap:9px;margin-bottom:10px}.habit-check{width:30px;height:30px;border-radius:9px;border:2px solid #a9b8c7;flex:none;background:#fff;cursor:pointer;padding:0}
+.habit-check.done{background:#2f9e6a;border-color:#2f9e6a;position:relative}.habit-check.done:after{content:"✓";position:absolute;color:#fff;font-size:18px;font-weight:900;left:4px;top:-1px}
+.habit-check:disabled{opacity:.4;cursor:default}
+.habit-row{display:grid;grid-template-columns:30px 1fr;gap:11px;align-items:center;padding:12px 2px;border-bottom:1px solid #edf0f4}.habit-row:last-child{border-bottom:0}
+.habit-row .d{font-size:14px;font-weight:750}.habit-row .d.done{text-decoration:line-through;color:#8293a4}.habit-row .m{font-size:11px;color:var(--muted);margin-top:3px}
+.habit-name{font-size:14px;font-weight:800;flex:1}.habit-percent{font-size:11px;font-weight:850;color:#2f9e6a}.habit-tools{display:flex;gap:2px}
+.habit-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}.habit-grid .hd{font-size:9px;color:var(--muted);font-weight:800}
+.hday{aspect-ratio:1;min-width:0;border-radius:8px;background:#f1f4f7;color:#617487;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.hday.done{background:#2f9e6a;color:#fff;font-weight:850}.hday.today{box-shadow:inset 0 0 0 2px var(--navy)}.hday.future{opacity:.35;cursor:default}.hday.empty{visibility:hidden}
+.habit-help{background:#eef8f3;border:1px solid #ccebdd;border-radius:14px;padding:10px 12px;font-size:11px;color:#245c45;margin-bottom:12px}
+
+/* Period days: descending shade from day 1 to day 5 */
+.cal-day.logged.period-day-1{background:#e0507a;color:#fff;font-weight:800}
+.cal-day.logged.period-day-2{background:#e86d91;color:#fff;font-weight:800}
+.cal-day.logged.period-day-3{background:#ee8aa6;color:#fff;font-weight:800}
+.cal-day.logged.period-day-4{background:#f3a7ba;color:#7a1f43;font-weight:800}
+.cal-day.logged.period-day-5{background:#f7c5d3;color:#7a1f43;font-weight:800}
+
+/* Page title icons */
+.appbar h1{display:flex;align-items:center;gap:5px}
+
+/* Habit calendar — legible done/total fraction, not color-only dots */
+.habit-grid .hday{position:relative;overflow:visible;flex-direction:column;gap:1px;padding-top:2px}
+.habit-grid .hday > span.habit-frac{
+  font-size:8.5px;font-weight:800;line-height:1;color:var(--muted);
+  background:#e9edf1;border-radius:5px;padding:1.5px 4px;
+}
+.habit-grid .hday.all-done > span.habit-frac{background:#2f9e6a;color:#fff}
+.habit-grid .hday.some-done > span.habit-frac{background:#fde3a7;color:#8a5a00}
+.habit-grid .hday.none-done > span.habit-frac{background:#f6d2d2;color:#8a2626}
+.refresh-hero{background:linear-gradient(160deg,#2b2f3a,#1b1e26);border-radius:20px;padding:16px;color:#fff;margin-bottom:14px}
+.burn-wrap{position:relative;border-radius:14px;overflow:hidden}
+#refreshInput{width:100%;min-height:150px;border-radius:14px;border:1px solid var(--line);padding:14px;font-size:14px;font-family:inherit;line-height:1.5;resize:vertical;background:#fff;color:var(--navy)}
+#refreshInput.hidden-for-burn{visibility:hidden}
+.burn-overlay{display:none;position:absolute;inset:0;padding:14px;font-size:14px;font-family:inherit;line-height:1.5;color:var(--navy);white-space:pre-wrap;word-break:break-word;pointer-events:none;overflow:hidden}
+.burn-overlay.active{display:block}
+.burn-line{display:block}
+.burn-line.burning{animation:lineBurn linear forwards}
+@keyframes lineBurn{
+  0%{color:var(--navy);filter:none;opacity:1}
+  30%{color:#c0392b}
+  55%{color:#ff7b1a;filter:blur(0.6px) brightness(1.3);text-shadow:0 0 6px #ff7b1a77}
+  85%{color:#ff9a3c;filter:blur(2px) brightness(1.6);text-shadow:0 0 10px #ff7b1aaa;opacity:.5}
+  100%{opacity:0;filter:blur(4px) brightness(1.8);transform:translateY(-3px)}
+}
+.flames{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.flame-particle{position:absolute;font-size:18px;opacity:0;animation:flameRise 1.3s ease-out forwards}
+@keyframes flameRise{0%{opacity:0;transform:translateY(0) scale(0.6)}15%{opacity:1}100%{opacity:0;transform:translateY(-70px) scale(1.25) rotate(8deg)}}
+.refresh-btn{width:100%;margin-top:12px;background:#c04a1e}
+.refresh-result{background:#eef8f3;border:1px solid #ccebdd;text-align:center;animation:fadeInUp .6s ease}
+.refresh-result.crisis{background:#fdf1ef;border:1px solid #f3cac3}
+.refresh-msg .sympathy{font-size:14px;font-weight:700;color:#245c45;line-height:1.5}
+.refresh-result.crisis .sympathy{color:#8a2f1f}
+.refresh-msg .solution{margin-top:9px;font-size:13px;font-weight:650;color:#17633f;line-height:1.5;background:#fff;border-radius:10px;padding:10px 12px}
+.refresh-result.crisis .solution{color:#8a2318}
+.trash-toggle{display:none;width:100%;margin-top:10px;padding:11px 12px;border:1px dashed var(--line);border-radius:12px;background:#f7f5f0;color:var(--muted);font-size:11.5px;font-weight:750;text-align:left;align-items:center;justify-content:space-between}
+.trash-box{display:none;margin-top:8px;padding:11px 13px;border-radius:12px;background:#f2f0ea;font-size:12.5px;color:#8a8477;text-decoration:line-through;line-height:1.55;white-space:pre-wrap}
+.trash-clear{margin-top:8px;background:none;border:0;color:#b45;font-size:10.5px;font-weight:700;text-decoration:underline;padding:0}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.refresh-msg{font-size:15px;font-weight:700;color:#17633f;line-height:1.5;margin:6px 0 4px}
+</style></head><body>
+<div class="app">
+
+<!-- ===== TASKS PAGE ===== -->
+<div class="page active" id="page-tasks">
+<div class="appbar">
+  <div class="brand"><img class="logo" src="icons/icon-192.png" alt=""><div><h1>Hey Kee🥰</h1><p>Simple. Private. On time.</p></div></div>
+  <button class="icon-btn" id="pushSettingsBtn" onclick="openPushSettings()" aria-label="Background alert settings" title="Background alert settings">🔔</button>
+  <button class="icon-btn" id="installBtn" style="display:none" title="Install Kee Reminder" aria-label="Install Kee Reminder app">⬇️</button>
+</div>
+<div class="install-banner" id="installBanner">
+  <div class="install-copy"><b>Install Kee Reminder</b><span>Put it on your home screen like an app.</span></div>
+  <button class="install-now" id="installNow">Install</button>
+  <button class="install-close" id="installClose" aria-label="Dismiss install banner">×</button>
+</div>
+<section class="hero"><div class="hero-row"><div><div class="big" id="count">0</div><div class="label">pending tasks</div></div><div class="hero-date" id="date"></div></div><div class="progress"><div class="bar" id="bar"></div></div></section>
+
+<section class="card" style="text-align:center;padding:14px 16px"><div class="small" style="font-style:italic;color:var(--navy);font-weight:650" id="motivationLine"></div></section>
+
+<button class="add-main" onclick="openNew()">＋ Add new task</button>
+<section class="quick">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px"><div class="quick-title" style="margin:0">Quick tasks</div><button class="icon" id="qEditBtn" onclick="toggleQuickEdit()" aria-label="Edit quick tasks">✏️</button></div>
+<div class="chips" id="chips"></div>
+</section>
+
+<div class="filters"><button class="filter active" data-f="all">All</button><button class="filter" data-f="today">Today</button><button class="filter" data-f="pending">Pending</button><button class="filter" data-f="done">Done</button></div>
+<section class="card" id="list"></section>
+
+<section class="card">
+<b>🔔 Morning reminder</b>
+<div class="smallnote" style="margin:6px 0 10px">Kee Reminder checks today's tasks at <b>7:00 AM</b> and <b>4:00 PM</b>, showing completed and pending status.</div>
+<button class="primary" id="notify">Enable notifications</button>
+<button class="ghost" id="test" style="margin-left:6px">Test</button>
+</section>
+<div class="smallnote" style="text-align:center;margin-bottom:70px">Private • Offline • Data stays on this device</div>
+</div>
+
+<!-- ===== HABITS PAGE ===== -->
+<div class="page" id="page-habits">
+<div class="appbar"><div class="brand"><img class="logo" src="icons/icon-192.png" alt=""><div><h1>🌱 Habits</h1><p>One calendar. All your habits.</p></div></div></div>
+<section class="hero" style="background:linear-gradient(135deg,#0f5132,#2f9e6a)"><div class="hero-row"><div><div class="big" id="habitsDoneCount">0</div><div class="label">habits done today</div></div><div class="hero-date" id="habitsDate"></div></div><div class="progress"><div class="bar" id="habitsBar" style="background:#fff"></div></div></section>
+<div class="month-head"><button class="icon" onclick="shiftHabitMonth(-1)" aria-label="Previous month">‹</button><div class="month-name" id="habitMonthLabel"></div><button class="icon" onclick="shiftHabitMonth(1)" aria-label="Next month">›</button></div>
+<div class="habit-summary"><div class="hstat"><div class="n" id="monthCompleted">0</div><div class="l">Completed</div></div><div class="hstat"><div class="n" id="monthMissed">0</div><div class="l">Incomplete</div></div><div class="hstat"><div class="n" id="monthRate">0%</div><div class="l">Success rate</div></div></div>
+<section class="card"><div class="section-title">📅 Monthly habit calendar</div><div class="small">One calendar for all habits. Each date shows habits done / total. Tap a date to open that day's checklist.</div><div class="habit-grid" id="habitCalendar" style="margin-top:10px"></div><div class="habit-help" style="margin-top:10px">Past untapped days are automatically incomplete. Today can be completed. Future days are locked.</div><div id="habitDayList"></div></section>
+<button class="add-main" style="background:#2f9e6a;box-shadow:0 8px 18px #2f9e6a33" onclick="openNewHabit()">＋ Add habit</button>
+<section class="card" id="habitsList"></section>
+<div class="smallnote" style="text-align:center;margin-bottom:70px">Private • Offline • Data stays on this device</div>
+</div>
+
+<!-- ===== PERIODS PAGE ===== -->
+<div class="page" id="page-periods">
+<div class="appbar">
+  <div class="brand"><img class="logo" src="icons/icon-192.png" alt=""><div><h1>🩸 Periods</h1><p>Simple. Private. On this device.</p></div></div>
+</div>
+
+<section class="hero pink"><div class="hero-row"><div><div class="big" id="cycleDay">–</div><div class="label" id="cycleLabel">no data yet</div><div class="label" id="phaseLabel" style="margin-top:4px;font-weight:800"></div></div><div class="hero-date" id="nextInfo"></div></div><div class="progress"><div class="bar" id="pbar"></div></div></section>
+
+<div class="card advice" id="adviceCard" style="display:none">
+  <div class="section-title" id="adviceTitle">💡 Heads up</div>
+  <div class="small" id="adviceText"></div>
+</div>
+
+<button class="add-main pink" onclick="openNewPeriod()">＋ Log period start date</button>
+
+<div class="stats" style="grid-template-columns:1fr 1fr 1fr">
+  <div class="stat"><div class="n" id="avgLen">–</div><div class="l">Avg cycle (days)</div></div>
+  <div class="stat"><div class="n" id="avgPeriodLen">–</div><div class="l">Avg period (days)</div></div>
+  <div class="stat"><div class="n" id="lastDate">–</div><div class="l">Last start</div></div>
+</div>
+
+<section class="card">
+<div class="cal-head">
+  <button class="icon" onclick="shiftMonth(-1)" aria-label="Previous month">‹</button>
+  <div style="text-align:center"><div class="section-title" id="calLabel" style="margin:0">Month</div><button class="icon" style="font-size:10px;margin-top:2px" onclick="goPeriodToday()">Today</button></div>
+  <button class="icon" onclick="shiftMonth(1)" aria-label="Next month">›</button>
+</div>
+<div class="cal-grid" id="calWeekdays"></div>
+<div class="cal-grid" id="calDays"></div>
+<div class="cal-legend"><span><i class="dot logged"></i>Period day</span><span><i class="dot predicted"></i>Predicted</span><span><i class="dot" style="border:2px dashed #6fb3e0"></i>Fertile (est.)</span></div>
+</section>
+
+<section class="card" id="insightsCard" style="display:none">
+<div class="section-title">📊 Insights</div>
+<div class="small" id="fertileText" style="margin-bottom:8px"></div>
+<div class="small" style="margin-bottom:4px">Recent cycle lengths</div>
+<div id="trendChart" style="display:flex;align-items:flex-end;gap:5px;height:46px;margin:4px 0 6px"></div>
+<div class="small" id="irregularText" style="color:#b45"></div>
+</section>
+
+<section class="card tips-card" id="tipsCard">
+<div class="section-title" id="tipsTitle">💡 Healthy tip for today</div>
+<div class="small" id="tipText"></div>
+</section>
+
+<section class="card">
+<div class="section-title">History</div>
+<div id="plist"></div>
+</section>
+
+<section class="card">
+<div class="section-title">🔒 Backup</div>
+<div class="small" style="margin-bottom:9px">Export saves your tasks and period history as one file. Import restores from that file — handy when switching phones.</div>
+<div class="two"><button class="ghost" onclick="exportBackup()">Export data</button><button class="ghost" onclick="document.getElementById('importFile').click()">Import data</button></div>
+<input type="file" id="importFile" accept="application/json" style="display:none" onchange="importBackup(event)">
+</section>
+<div class="smallnote" style="text-align:center;margin-bottom:70px">Private • Offline • Data stays on this device</div>
+</div>
+
+<div class="page" id="page-refresh">
+<div class="appbar">
+  <div class="brand"><img class="logo" src="icons/icon-192.png" alt=""><div><h1>🔥 Refresh Me</h1><p>Let it out, then let it go.</p></div></div>
+  <button class="icon-btn" id="aiSettingsBtn" onclick="openAISettings()" aria-label="AI response settings" title="AI response settings">⚙️</button>
+</div>
+
+<section class="card" style="text-align:center;padding:14px 16px"><div class="small" style="font-style:italic;color:var(--navy);font-weight:650" id="refreshMotivationLine"></div></section>
+
+<div class="small" id="aiStatusLine" style="text-align:center;margin:-4px 0 12px;color:var(--muted)"></div>
+
+<section class="card">
+<div class="section-title">What's on your mind?</div>
+<div class="small" style="margin-bottom:10px" id="refreshDesc">Type out the problem, the stress, whatever it is right now. Nothing is written to your device — once you release it, it moves to a trashed spot below that only lasts until you leave this page.</div>
+<div class="burn-wrap">
+<textarea id="refreshInput" placeholder="Type it all out here..."></textarea>
+<div class="burn-overlay" id="burnOverlay"></div>
+<div class="flames" id="flames"></div>
+</div>
+<button class="primary refresh-btn" id="refreshBtn" onclick="releaseRefresh()">🔥 Release it</button>
+</section>
+
+<section class="card refresh-result" id="refreshResult" style="display:none">
+<div class="section-title" style="justify-content:center;display:flex" id="refreshTitle">✨ Now breathe</div>
+<div class="refresh-msg" id="refreshMsg"><div class="sympathy" id="refreshSympathy"></div><div class="solution" id="refreshSolution" style="display:none"></div></div>
+<div class="smallnote" id="refreshFallbackNote" style="display:none;margin-top:8px">Used an offline response — the AI reply didn't come through this time.</div>
+<button class="ghost" style="margin-top:10px" onclick="closeRefreshResult()">Done</button>
+</section>
+
+<section class="card" id="trashSection" style="display:none">
+<button class="trash-toggle" id="trashToggle" style="display:flex" onclick="toggleTrash()"><span id="trashLabel">🗑️ Trashed — tap to see what you released</span><span id="trashChevron">▾</span></button>
+<div class="trash-box" id="trashBox"></div>
+<button class="trash-clear" id="trashClearBtn" style="display:none" onclick="emptyTrash()">Empty trash now</button>
+</section>
+
+<div class="smallnote" style="text-align:center;margin-bottom:6px">Private • Offline • Never written to your device — the trashed text only stays visible here until you leave this page or release something new</div>
+<div class="smallnote" style="text-align:center;margin-bottom:70px;font-style:italic">Built by your well wisher 💛</div>
+</div>
+
+</div>
+
+<div class="footer-nav"><div class="footer-inner">
+  <button class="nav-item active" id="navTasks" onclick="showPage('tasks')"><span>✅</span>Tasks</button>
+  <button class="nav-item" id="navHabits" onclick="showPage('habits')"><span>🌱</span>Habits</button>
+  <button class="nav-item" id="navPeriods" onclick="showPage('periods')"><span>🩸</span>Periods</button>
+  <button class="nav-item" id="navRefresh" onclick="showPage('refresh')"><span>🔥</span>Refresh Me</button>
+</div></div>
+
+<!-- Task modal -->
+<div class="modal" id="modal"><div class="sheet">
+<h2 id="modalTitle">Add task</h2><div class="grid">
+<input id="name" maxlength="120" placeholder="Task name">
+<div class="two"><input id="dateInput" type="date"><select id="time"><option value="">No alarm</option><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>12:00</option><option>13:00</option><option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option></select></div>
+<div><b style="font-size:13px">Repeat</b><div class="repeat" style="margin-top:6px"><button data-r="none" class="active">No repeat</button><button data-r="daily">Daily</button><button data-r="weekly">Weekly</button><button data-r="monthly">Monthly</button></div></div>
+<div><button type="button" class="emergency-toggle" id="emergencyBtn" onclick="toggleEmergency()">🚨 Mark as Emergency task</button></div>
+<div class="smallnote" id="emergencyNote" style="display:none">Emergency tasks stay in your phone's notification bar and won't go away until you mark them completed in the app.</div>
+<div class="smallnote">The 8:00 AM morning reminder is automatic for pending tasks scheduled for today. You can also set a separate alarm time above.</div>
+<div class="two"><button class="ghost" onclick="closeModal()">Cancel</button><button class="primary" onclick="saveTask()">Save task</button></div>
+</div></div></div>
+
+<!-- Habit modal -->
+<div class="modal" id="hmodal"><div class="sheet">
+<h2 id="hmodalTitle">Add habit</h2><div class="grid">
+<input id="habitName" maxlength="60" placeholder="e.g. Drink 2L water">
+<div class="two"><button class="ghost" onclick="closeHabitModal()">Cancel</button><button class="primary" style="background:#2f9e6a" onclick="saveHabit()">Save</button></div>
+</div></div></div>
+
+<!-- Quick task add modal -->
+<div class="modal" id="qmodal"><div class="sheet">
+<h2>Add quick task</h2><div class="grid">
+<input id="qname" maxlength="60" placeholder="e.g. PAY EB BILL">
+<div class="two"><button class="ghost" onclick="closeQuickModal()">Cancel</button><button class="primary" onclick="saveQuickTask()">Add</button></div>
+</div></div></div>
+
+<!-- Period modal -->
+<div class="modal" id="pmodal"><div class="sheet">
+<h2 id="pmodalTitle">Log period start</h2><div class="grid">
+<div><b style="font-size:13px">Date</b><input id="periodDateInput" type="date" style="margin-top:6px"></div>
+<div><b style="font-size:13px">End date (optional)</b><input id="periodEndInput" type="date" style="margin-top:6px"><div class="smallnote" style="margin-top:4px">Leave blank if it hasn't ended yet — you can add it later.</div></div>
+<div><b style="font-size:13px">Flow</b><div class="repeat" style="grid-template-columns:1fr 1fr 1fr;margin-top:6px" id="flowRow">
+<button data-flow="Light">Light</button><button data-flow="Medium" class="active">Medium</button><button data-flow="Heavy">Heavy</button>
+</div></div>
+<div><b style="font-size:13px">Note (optional)</b><input id="periodNote" maxlength="80" placeholder="e.g. cramps, mood" style="margin-top:6px"></div>
+<div class="smallnote">Defaults to today. You can change it to log a past date.</div>
+<div class="two"><button class="ghost" onclick="closePeriodModal()">Cancel</button><button class="primary pink" onclick="savePeriodEntry()">Save</button></div>
+</div></div></div>
+
+<!-- AI settings modal -->
+<div class="modal" id="aimodal"><div class="sheet">
+<h2>AI advice for Refresh Me</h2>
+<div class="grid">
+<div class="small">By default, Refresh Me's responses come from a small set of built-in, offline replies — nothing ever leaves this device. Adding your own Anthropic API key switches to real AI-generated advice, tailored to exactly what you write. This sends the text you type to Anthropic's API when you do.</div>
+<div><b style="font-size:13px">Anthropic API key</b><input id="aiKeyInput" type="password" placeholder="sk-ant-..." style="margin-top:6px"></div>
+<label class="small" style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="aiKeyRemember" style="width:auto"> Remember this key on this device</label>
+<div class="smallnote" id="aiKeyNote">Crisis, safety, and eating-concern messages are always handled by the built-in offline responses first, whether or not AI is on — those never wait on a network call.</div>
+<div class="two"><button class="ghost" onclick="clearAIKey()">Clear key</button><button class="primary" onclick="saveAIKey()">Save</button></div>
+<button class="ghost" style="width:100%" onclick="closeAISettings()">Close</button>
+</div></div></div>
+
+<!-- Background alerts (push notification) settings modal -->
+<div class="modal" id="pushmodal"><div class="sheet">
+<h2>🔔 Background alerts</h2>
+<div class="grid">
+<div class="small">By default, task alarms only fire while this app is open. To get alerts even with the app fully closed, you need to run a small free server (see the project's README for setup) and point the app at it here. Turning this on sends your task titles and due times — not habit or period data — to that server so it knows when to alert you.</div>
+<div><b style="font-size:13px">Server URL</b><input id="pushServerUrl" type="text" placeholder="https://your-server.example.com" style="margin-top:6px"></div>
+<div><b style="font-size:13px">Shared secret (if your server has one)</b><input id="pushSecret" type="password" placeholder="optional" style="margin-top:6px"></div>
+<div class="smallnote" id="pushStatusText">Background alerts are off — alarms only fire while the app is open.</div>
+<div class="two"><button class="ghost" onclick="disableBackgroundAlerts()">Turn off</button><button class="primary" onclick="enableBackgroundAlerts()">Turn on</button></div>
+<button class="ghost" style="width:100%" onclick="closePushSettings()">Close</button>
+</div></div></div>
+
+<script>
+/* ---------- Page switching ---------- */
+function showPage(p){
+  document.getElementById('page-tasks').classList.toggle('active',p==='tasks');
+  document.getElementById('page-habits').classList.toggle('active',p==='habits');
+  document.getElementById('page-periods').classList.toggle('active',p==='periods');
+  document.getElementById('page-refresh').classList.toggle('active',p==='refresh');
+  document.getElementById('navTasks').classList.toggle('active',p==='tasks');
+  document.getElementById('navHabits').classList.toggle('active',p==='habits');
+  document.getElementById('navPeriods').classList.toggle('active',p==='periods');
+  document.getElementById('navRefresh').classList.toggle('active',p==='refresh');
+  document.getElementById('navHabits').classList.toggle('green-active',p==='habits');
+  document.getElementById('navPeriods').classList.toggle('pink-active',p==='periods');
+}
+
+/* ---------- Tasks logic ---------- */
+const KEY='taskbell_tasks_v2';let tasks=JSON.parse(localStorage.getItem(KEY)||'[]'),editing=null,repeat='none',filter='all',emergency=false;
+tasks=tasks.map(x=>({...x,emergency:!!x.emergency}));
+const $=id=>document.getElementById(id);const save=()=>{localStorage.setItem(KEY,JSON.stringify(tasks));if(typeof syncAlarmsToServer==='function')syncAlarmsToServer();};
+function today(){return new Date().toISOString().slice(0,10)}
+function fmt(t){return new Date(t).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}
+function isToday(t){return t&&new Date(t).toDateString()===new Date().toDateString()}
+function render(){let p=tasks.filter(x=>!x.done),d=tasks.filter(x=>x.done);$('count').textContent=p.length;$('bar').style.width=(tasks.length?d.length/tasks.length*100:0)+'%';$('date').textContent=new Date().toLocaleDateString([], {weekday:'short',month:'short',day:'numeric'});
+let a=tasks.slice().sort((x,y)=>(x.done-y.done)||(new Date(x.due||'2999')-new Date(y.due||'2999')));if(filter==='today')a=a.filter(x=>isToday(x.due)||x.date===today());if(filter==='pending')a=a.filter(x=>!x.done);if(filter==='done')a=a.filter(x=>x.done);
+$('list').innerHTML=a.length?a.map(x=>{let late=x.due&&!x.done&&new Date(x.due)<new Date();return `<div class="task${x.emergency?' emergency':''}"><div class="check ${x.done?'done':''}" onclick="toggle('${x.id}')" role="checkbox" aria-checked="${x.done}" aria-label="Mark ${esc(x.title)} as ${x.done?'not done':'done'}"></div><div><div class="title ${x.done?'done':''}">${x.emergency?'<span class="emergency-badge">EMERGENCY</span>':''}${esc(x.title)}</div><div class="meta">${x.due?'🔔 '+fmt(x.due):'No alarm'}${x.repeat&&x.repeat!=='none'?' · 🔁 '+x.repeat:''}${late?' · ⚠️ Overdue':''}</div></div><div class="acts"><button class="icon" onclick="edit('${x.id}')" aria-label="Edit ${esc(x.title)}">✏️</button><button class="icon" onclick="del('${x.id}')" aria-label="Delete ${esc(x.title)}">🗑️</button></div></div>`}).join(''):'<div class="empty"><b>Nothing here 🎯</b>Add a task to get started.</div>'}
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function openNew(pref=''){editing=null;repeat='none';emergency=false;$('modalTitle').textContent='Add task';$('name').value=pref;$('dateInput').value=today();$('time').value='';setRepeat();setEmergencyBtn();$('modal').style.display='flex'}
+function quick(n){openNew(n)}
+
+/* ---------- Quick tasks (editable) ---------- */
+const QKEY='kee_quicktasks_v1';
+const DEFAULT_QUICK=['PAY EB BILL','TNMSC INDENT','ARV REFILLING','EVIN PORTAL ENTRY','DD OFFICE'];
+let quickTasks=JSON.parse(localStorage.getItem(QKEY)||'null')||DEFAULT_QUICK.slice();
+const qsave=()=>localStorage.setItem(QKEY,JSON.stringify(quickTasks));
+let quickEditMode=false;
+function toggleQuickEdit(){quickEditMode=!quickEditMode;$('qEditBtn').textContent=quickEditMode?'✔️':'✏️';$('qEditBtn').setAttribute('aria-label',quickEditMode?'Done editing quick tasks':'Edit quick tasks');renderChips()}
+function renderChips(){
+  let html=quickTasks.map(n=>quickEditMode
+    ?`<span class="chip">${esc(n)}<span class="x" onclick="removeQuickTask('${esc(n).replace(/'/g,"\\'")}')">×</span></span>`
+    :`<button class="chip" onclick="quick('${esc(n).replace(/'/g,"\\'")}')">${esc(n)}</button>`
+  ).join('');
+  if(quickEditMode)html+=`<button class="chip add" onclick="openQuickModal()">＋ Add</button>`;
+  $('chips').innerHTML=html;
+}
+function openQuickModal(){$('qname').value='';$('qmodal').style.display='flex'}
+function closeQuickModal(){$('qmodal').style.display='none'}
+function saveQuickTask(){
+  let n=$('qname').value.trim();if(!n)return;
+  if(!quickTasks.includes(n))quickTasks.push(n);
+  qsave();closeQuickModal();renderChips();
+}
+function removeQuickTask(n){
+  quickTasks=quickTasks.filter(x=>x!==n);qsave();renderChips();
+}
+
+/* ---------- Daily motivation ---------- */
+const MOTIVATIONS=[
+"Small steps every day add up to big progress.",
+"You don't have to be perfect, just consistent.",
+"One task at a time — that's all it takes.",
+"Progress, not perfection.",
+"Today is a fresh page. Write something good on it.",
+"Discipline is choosing what you want most over what you want now.",
+"Done is better than perfect.",
+"You've got this — one checkbox at a time.",
+"Every small win counts toward the bigger goal.",
+"Start where you are. Use what you have. Do what you can.",
+"A calm mind gets more done than a rushed one.",
+"Take a breath, then take the next step.",
+"Consistency beats intensity in the long run.",
+"Rest is productive too — pace yourself.",
+"You handled hard days before. You can handle today.",
+"Focus on the next right thing, not everything at once.",
+"Little by little, a little becomes a lot.",
+"Be proud of how far you've already come.",
+"Clarity comes from action, not overthinking.",
+"Today's effort is tomorrow's ease."
+];
+function renderMotivation(){
+  let dayIndex=Math.floor(Date.now()/86400000);
+  let q='"'+MOTIVATIONS[dayIndex%MOTIVATIONS.length]+'"';
+  $('motivationLine').textContent=q;
+  let rm=$('refreshMotivationLine');if(rm)rm.textContent=q;
+}
+renderChips();renderMotivation();
+
+/* ---------- Habits: single calendar ---------- */
+const HKEY='kee_habits_v1';
+let habits=JSON.parse(localStorage.getItem(HKEY)||'[]');
+habits=habits.map(h=>({id:h.id||crypto.randomUUID(),name:h.name||'Habit',doneDates:Array.isArray(h.doneDates)?h.doneDates:[]}));
+const hsave=()=>localStorage.setItem(HKEY,JSON.stringify(habits));
+let editingHabit=null,habitMonth=new Date();habitMonth.setDate(1),selectedHabitDate=today();
+function dateKey(y,m,d){return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+function monthDays(y,m){return new Date(y,m+1,0).getDate()}
+function habitStreak(h){let n=0,d=new Date();if(!h.doneDates.includes(today()))d.setDate(d.getDate()-1);while(h.doneDates.includes(d.toISOString().slice(0,10))){n++;d.setDate(d.getDate()-1)}return n}
+function monthStats(){let y=habitMonth.getFullYear(),m=habitMonth.getMonth(),days=monthDays(y,m),now=new Date();now.setHours(0,0,0,0);let elapsed=(y===now.getFullYear()&&m===now.getMonth())?now.getDate():(new Date(y,m+1,0)<now?days:0),c=0,miss=0;habits.forEach(h=>{for(let d=1;d<=elapsed;d++){if(h.doneDates.includes(dateKey(y,m,d)))c++;else miss++}});return{c,miss,r:(c+miss)?Math.round(c/(c+miss)*100):0}}
+function renderHabitCalendar(){let y=habitMonth.getFullYear(),m=habitMonth.getMonth(),days=monthDays(y,m),first=new Date(y,m,1).getDay(),t=today();$('habitMonthLabel').textContent=habitMonth.toLocaleDateString([],{month:'long',year:'numeric'});let out=['S','M','T','W','T','F','S'].map(x=>`<div class="hd">${x}</div>`).join('');for(let i=0;i<first;i++)out+='<div class="hday empty"></div>';for(let d=1;d<=days;d++){let k=dateKey(y,m,d),future=k>t;let done=habits.length&&!future?habits.filter(h=>h.doneDates.includes(k)).length:0,total=habits.length;let state=!habits.length||future?'':done===total?' all-done':done===0?' none-done':' some-done';let frac=habits.length&&!future?`<span class="habit-frac" title="${done} of ${total} habits completed">${done}/${total}</span>`:'';let cls='hday'+(k===t?' today':'')+(future?' future':'')+state;out+=future?`<div class="${cls}">${d}</div>`:`<div class="${cls}" onclick="selectHabitDate('${k}')">${d}${frac}</div>`}$('habitCalendar').innerHTML=out;renderHabitDayList(selectedHabitDate)}
+function renderHabitDayList(k){if(!habits.length){$('habitDayList').innerHTML='<div class="empty"><b>No habits yet 🌱</b>Add a habit to start.</div>';return}let d=new Date(k+'T00:00:00');let future=k>today();$('habitDayList').innerHTML=`<div class="section-title" style="margin-top:12px">Checklist · ${d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})}</div>`+habits.map(h=>{let done=h.doneDates.includes(k);return `<div class="habit-row"><button class="habit-check${done?' done':''}" ${future?'disabled':''} onclick="toggleHabitDate('${h.id}','${k}')" aria-label="${done?'Mark '+esc(h.name)+' as not done':'Mark '+esc(h.name)+' as done'}"></button><div><div class="d${done?' done':''}">${esc(h.name)}</div><div class="m">${future?'Not yet':done?'✓ Completed':'✕ Incomplete — tap the box to mark done'}${habitStreak(h)?' · 🔥 '+habitStreak(h)+' day streak':''}</div></div></div>`}).join('')}
+function selectHabitDate(k){selectedHabitDate=k;renderHabitCalendar()}
+function shiftHabitMonth(n){habitMonth.setMonth(habitMonth.getMonth()+n);selectedHabitDate=dateKey(habitMonth.getFullYear(),habitMonth.getMonth(),1);renderHabits()}
+function renderHabits(){let t=today(),doneToday=habits.filter(h=>h.doneDates.includes(t)).length;$('habitsDoneCount').textContent=doneToday;$('habitsBar').style.width=(habits.length?doneToday/habits.length*100:0)+'%';$('habitsDate').textContent=new Date().toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});let ms=monthStats();$('monthCompleted').textContent=ms.c;$('monthMissed').textContent=ms.miss;$('monthRate').textContent=ms.r+'%';renderHabitCalendar();$('habitsList').innerHTML=habits.map(h=>{let st=habitStreak(h);return `<div class="entry"><div><div class="d">${esc(h.name)}</div><div class="m"${st>=7?' style="color:#e0507a;font-weight:800"':''}>🔥 ${st} day streak${st>=7?' — on fire!':''}</div></div><div class="acts"><button class="icon" onclick="editHabit('${h.id}')" aria-label="Edit ${esc(h.name)}">✏️</button><button class="icon" onclick="removeHabit('${h.id}')" aria-label="Delete ${esc(h.name)}">🗑️</button></div></div>`}).join('')||'<div class="empty"><b>No habits yet 🌱</b>Add a habit to start.</div>'}
+function openNewHabit(){editingHabit=null;$('hmodalTitle').textContent='Add habit';$('habitName').value='';$('hmodal').style.display='flex'}
+function editHabit(id){let h=habits.find(x=>x.id===id);if(!h)return;editingHabit=id;$('hmodalTitle').textContent='Edit habit';$('habitName').value=h.name;$('hmodal').style.display='flex'}
+function closeHabitModal(){$('hmodal').style.display='none'}
+function saveHabit(){let n=$('habitName').value.trim();if(!n)return alert('Enter a habit name.');if(editingHabit)habits.find(x=>x.id===editingHabit).name=n;else habits.push({id:crypto.randomUUID(),name:n,doneDates:[]});hsave();closeHabitModal();renderHabits()}
+function removeHabit(id){if(confirm('Delete this habit and its history?')){habits=habits.filter(x=>x.id!==id);hsave();renderHabits()}}
+function toggleHabitDate(id,k){if(k>today())return;let h=habits.find(x=>x.id===id);if(!h)return;if(h.doneDates.includes(k))h.doneDates=h.doneDates.filter(x=>x!==k);else h.doneDates.push(k);hsave();renderHabits()}
+renderHabits();
+
+function edit(id){let x=tasks.find(t=>t.id===id);editing=id;repeat=x.repeat||'none';emergency=!!x.emergency;$('modalTitle').textContent='Edit task';$('name').value=x.title;$('dateInput').value=x.date||today();$('time').value=x.time||'';setRepeat();setEmergencyBtn();$('modal').style.display='flex'}
+function closeModal(){$('modal').style.display='none'}
+function setRepeat(){document.querySelectorAll('[data-r]').forEach(b=>b.classList.toggle('active',b.dataset.r===repeat))}
+function toggleEmergency(){emergency=!emergency;setEmergencyBtn()}
+function setEmergencyBtn(){$('emergencyBtn').classList.toggle('active',emergency);$('emergencyBtn').textContent=emergency?'🚨 Emergency task — ON':'🚨 Mark as Emergency task';$('emergencyNote').style.display=emergency?'block':'none'}
+document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{repeat=b.dataset.r;setRepeat()});
+function saveTask(){let title=$('name').value.trim();if(!title)return alert('Enter a task name.');let date=$('dateInput').value||today(),time=$('time').value,due=time?new Date(date+'T'+time).toISOString():null;
+if(editing){let x=tasks.find(t=>t.id===editing);Object.assign(x,{title,date,time,due,repeat,emergency});}else tasks.unshift({id:crypto.randomUUID(),title,date,time,due,repeat,emergency,done:false,created:Date.now(),alarmSent:false,morningSent:false,eveningSent:false});
+save();closeModal();render();syncEmergencyNotifications()}
+function toggle(id){let x=tasks.find(t=>t.id===id);x.done=!x.done;if(x.done)x.morningSent=true;save();render();syncEmergencyNotifications()}
+function del(id){if(confirm('Delete this task?')){closeEmergencyNotif(id);tasks=tasks.filter(x=>x.id!==id);save();render()}}
+document.querySelectorAll('.filter').forEach(b=>b.onclick=()=>{filter=b.dataset.f;document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');render()});
+$('notify').onclick=async()=>{if(!('Notification'in window))return alert('Notifications are not supported here.');let p=await Notification.requestPermission();alert(p==='granted'?'Notifications enabled.':'Please allow notifications in Chrome.')}
+$('test').onclick=()=>notify('Kee Reminder','Test notification is working.');
+function notify(title,body){if('Notification'in window&&Notification.permission==='granted')new Notification(title,{body,icon:'icons/icon-192.png'});else alert(title+'\\n'+body)}
+
+/* ---------- Emergency task: sticky notification until marked completed ---------- */
+let emergencyNotifRefs={};
+function closeEmergencyNotif(id){
+  let tag='kee-emergency-'+id;
+  if(emergencyNotifRefs[id]){try{emergencyNotifRefs[id].close()}catch(e){}delete emergencyNotifRefs[id]}
+  if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(reg=>{if(reg&&reg.getNotifications)reg.getNotifications({tag}).then(ns=>ns.forEach(n=>n.close()))}).catch(()=>{});
+}
+function showEmergencyNotif(x){
+  if(!('Notification'in window)||Notification.permission!=='granted')return;
+  let tag='kee-emergency-'+x.id,title='🚨 EMERGENCY: '+x.title,body=(x.due?'Due '+fmt(x.due)+' · ':'')+'Mark it completed in Kee Reminder to clear this.';
+  let opts={body,tag,requireInteraction:true,renotify:false,icon:'icons/icon-192.png'};
+  if('serviceWorker'in navigator){
+    navigator.serviceWorker.getRegistration().then(reg=>{
+      if(reg&&reg.showNotification)reg.showNotification(title,opts);else emergencyNotifRefs[x.id]=new Notification(title,opts);
+    }).catch(()=>{try{emergencyNotifRefs[x.id]=new Notification(title,opts)}catch(e){}});
+  }else{try{emergencyNotifRefs[x.id]=new Notification(title,opts)}catch(e){}}
+}
+function syncEmergencyNotifications(){tasks.forEach(x=>{if(x.emergency&&!x.done)showEmergencyNotif(x);else if(x.emergency&&x.done)closeEmergencyNotif(x.id)})}
+function taskStatusNotification(label,flag){let n=new Date();if(n.getHours()!==label)return;let key=today();let todays=tasks.filter(x=>x.date===key);let pending=todays.filter(x=>!x.done),done=todays.filter(x=>x.done);let sent=flag==='morningSent'?'morningSent':'eveningSent';let eligible=todays.filter(x=>!x[sent]);if(!eligible.length)return;let body="Today: "+done.length+" completed • "+pending.length+" pending";if(pending.length)body+="\nPending: "+pending.slice(0,4).map(x=>x.title).join(', ')+(pending.length>4?'…':'');notify(label===7?'Good morning 🔔':'4 PM task check 🔔',body);todays.forEach(x=>x[sent]=true);save()}
+function morning(){taskStatusNotification(7,'morningSent')}
+function evening(){taskStatusNotification(16,'eveningSent')}
+function alarms(){let now=Date.now(),changed=false;tasks.forEach(x=>{if(x.due&&!x.done&&!x.alarmSent&&new Date(x.due).getTime()<=now){notify('Task reminder 🔔',x.title);x.alarmSent=true;changed=true;if(x.repeat&&x.repeat!=='none'){let d=new Date(x.due);if(x.repeat==='daily')d.setDate(d.getDate()+1);if(x.repeat==='weekly')d.setDate(d.getDate()+7);if(x.repeat==='monthly')d.setMonth(d.getMonth()+1);x.date=d.toISOString().slice(0,10);x.due=d.toISOString();x.alarmSent=false;x.morningSent=false}}});if(changed)save();render()}
+/* ---------- Background alerts (optional Web Push, works with app closed) ---------- */
+const PUSH_CFG_KEY='kee_push_cfg_v1';
+const PUSH_DEVICE_KEY='kee_push_device_id_v1';
+function getDeviceId(){
+  let id='';
+  try{id=localStorage.getItem(PUSH_DEVICE_KEY)||''}catch(e){}
+  if(!id){
+    id=(crypto.randomUUID?crypto.randomUUID():'dev-'+Date.now()+'-'+Math.random().toString(36).slice(2));
+    try{localStorage.setItem(PUSH_DEVICE_KEY,id)}catch(e){}
+  }
+  return id;
+}
+function getPushCfg(){
+  try{return JSON.parse(localStorage.getItem(PUSH_CFG_KEY)||'null')||{enabled:false,url:'',secret:''}}
+  catch(e){return{enabled:false,url:'',secret:''}}
+}
+function setPushCfg(cfg){try{localStorage.setItem(PUSH_CFG_KEY,JSON.stringify(cfg))}catch(e){}}
+function urlBase64ToUint8Array(base64String){
+  const padding='='.repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(base64);
+  const arr=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+  return arr;
+}
+function updatePushStatus(){
+  let el=$('pushStatusText');if(!el)return;
+  let cfg=getPushCfg();
+  el.textContent=cfg.enabled&&cfg.url?'✅ Background alerts are on — pointed at '+cfg.url:'Background alerts are off — alarms only fire while the app is open.';
+}
+function openPushSettings(){
+  let cfg=getPushCfg();
+  $('pushServerUrl').value=cfg.url||'';
+  $('pushSecret').value=cfg.secret||'';
+  updatePushStatus();
+  $('pushmodal').style.display='flex';
+}
+function closePushSettings(){$('pushmodal').style.display='none'}
+async function enableBackgroundAlerts(){
+  let url=($('pushServerUrl').value||'').trim().replace(/\/$/,'');
+  let secret=($('pushSecret').value||'').trim();
+  if(!url){alert('Enter your server URL first.');return}
+  if(!('serviceWorker'in navigator)||!('PushManager'in window)){alert('This browser does not support push notifications.');return}
+  try{
+    let perm=await Notification.requestPermission();
+    if(perm!=='granted'){alert('Notification permission was not granted.');return}
+    let reg=await navigator.serviceWorker.ready;
+    let keyRes=await fetch(url+'/api/vapid-public-key');
+    if(!keyRes.ok)throw new Error('Could not reach server');
+    let{publicKey}=await keyRes.json();
+    let sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(publicKey)});
+    let deviceId=getDeviceId();
+    let subRes=await fetch(url+'/api/subscribe',{
+      method:'POST',
+      headers:{'content-type':'application/json','x-app-secret':secret},
+      body:JSON.stringify({deviceId,subscription:sub.toJSON?sub.toJSON():sub})
+    });
+    if(!subRes.ok)throw new Error('Server rejected subscription (check the shared secret)');
+    setPushCfg({enabled:true,url,secret});
+    updatePushStatus();
+    await syncAlarmsToServer();
+    alert('Background alerts are on.');
+  }catch(err){
+    alert('Could not turn on background alerts: '+err.message);
+  }
+}
+async function disableBackgroundAlerts(){
+  let cfg=getPushCfg();
+  try{
+    if('serviceWorker'in navigator){
+      let reg=await navigator.serviceWorker.ready;
+      let sub=await reg.pushManager.getSubscription();
+      if(sub)await sub.unsubscribe();
+    }
+    if(cfg.url){
+      await fetch(cfg.url+'/api/unsubscribe',{
+        method:'POST',
+        headers:{'content-type':'application/json','x-app-secret':cfg.secret||''},
+        body:JSON.stringify({deviceId:getDeviceId()})
+      }).catch(()=>{});
+    }
+  }catch(e){}
+  setPushCfg({enabled:false,url:cfg.url||'',secret:cfg.secret||''});
+  updatePushStatus();
+}
+async function syncAlarmsToServer(){
+  let cfg=getPushCfg();
+  if(!cfg.enabled||!cfg.url)return;
+  let list=tasks.filter(x=>x.due&&!x.done).map(x=>({id:x.id,title:x.title,due:new Date(x.due).getTime(),repeat:x.repeat||'none'}));
+  try{
+    await fetch(cfg.url+'/api/alarms',{
+      method:'POST',
+      headers:{'content-type':'application/json','x-app-secret':cfg.secret||''},
+      body:JSON.stringify({deviceId:getDeviceId(),alarms:list})
+    });
+  }catch(e){/* offline or server unreachable — local in-app alarms still work as a fallback */}
+}
+
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});render();syncEmergencyNotifications();syncAlarmsToServer();let __tick=0;setInterval(()=>{morning();evening();alarms();renderMotivation();if(typeof periodNotifyCheck==='function')periodNotifyCheck();__tick++;if(__tick%8===0)syncEmergencyNotifications()},15000);
+
+/* ---------- Periods logic ---------- */
+const PKEY='kee_periods_v1';
+let pdata=JSON.parse(localStorage.getItem(PKEY)||'{"history":[]}');
+pdata.history=(pdata.history||[]).map(h=>typeof h==='string'?{date:h,flow:'Medium',note:''}:h);
+const psave=()=>localStorage.setItem(PKEY,JSON.stringify(pdata));
+function dates(){return pdata.history.map(e=>e.date).sort()}
+function entries(){return pdata.history.slice().sort((a,b)=>a.date.localeCompare(b.date))}
+let editingPeriod=null,selFlow='Medium';
+document.querySelectorAll('#flowRow [data-flow]').forEach(b=>b.onclick=()=>{selFlow=b.dataset.flow;document.querySelectorAll('#flowRow [data-flow]').forEach(x=>x.classList.toggle('active',x===b))});
+function fmtLong(d){return new Date(d+'T00:00:00').toLocaleDateString([], {month:'short',day:'numeric',year:'numeric'})}
+function fmtShort(d){return new Date(d+'T00:00:00').toLocaleDateString([], {month:'short',day:'numeric'})}
+function daysBetween(a,b){return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000)}
+function avgCycleLength(){let h=dates();if(h.length<2)return 28;let diffs=[];for(let i=1;i<h.length;i++)diffs.push(daysBetween(h[i-1],h[i]));return Math.round(diffs.reduce((a,b)=>a+b,0)/diffs.length)}
+function predictedNext(){let h=dates();if(!h.length)return null;let last=h[h.length-1];let avg=avgCycleLength();let nd=new Date(last+'T00:00:00');nd.setDate(nd.getDate()+avg);return nd.toISOString().slice(0,10)}
+function fertileWindow(){
+  let next=predictedNext();if(!next)return null;
+  let ov=new Date(next+'T00:00:00');ov.setDate(ov.getDate()-14);
+  let start=new Date(ov);start.setDate(start.getDate()-5);
+  let arr=[];for(let d=new Date(start);d<=ov;d.setDate(d.getDate()+1))arr.push(d.toISOString().slice(0,10));
+  return {start:arr[0],end:arr[arr.length-1],days:arr};
+}
+function cyclePhase(cycleDay,avg,periodLen){
+  let ovDay=avg-13,fertileStart=ovDay-5;
+  if(cycleDay>avg)return '⏳ Luteal phase (period may be late)';
+  if(cycleDay<=periodLen)return '🩸 Menstrual phase';
+  if(cycleDay<fertileStart)return '🌱 Follicular phase';
+  if(cycleDay<=ovDay)return '🥚 Fertile / ovulation window';
+  return '🌙 Luteal phase';
+}
+let calMonth=new Date();calMonth.setDate(1);
+function shiftMonth(n){calMonth.setMonth(calMonth.getMonth()+n);renderCalendar()}
+function goPeriodToday(){calMonth=new Date();calMonth.setDate(1);renderCalendar()}
+function renderCalendar(){
+  let h=dates();
+  let year=calMonth.getFullYear(),month=calMonth.getMonth();
+  $('calLabel').textContent=calMonth.toLocaleDateString([], {month:'long',year:'numeric'});
+  let wd=['S','M','T','W','T','F','S'];
+  $('calWeekdays').innerHTML=wd.map(w=>`<div class="wd">${w}</div>`).join('');
+  let firstDow=new Date(year,month,1).getDay();
+  let daysInMonth=new Date(year,month+1,0).getDate();
+  let predicted=predictedNext();
+  let fertile=fertileWindow();
+  let cells='';
+  for(let i=0;i<firstDow;i++)cells+='<div class="cal-day pad"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    let ds=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    let cls='cal-day';
+    let periodDay=0;
+    pdata.history.forEach(e=>{
+      let diff=daysBetween(e.date,ds);
+      let len=e.endDate?daysBetween(e.date,e.endDate)+1:5;
+      if(diff>=0&&diff<len) periodDay=Math.max(periodDay,diff+1);
+    });
+    if(periodDay>0)cls+=' logged period-day-'+Math.min(periodDay,5);
+    else if(predicted&&ds===predicted)cls+=' predicted';
+    else if(fertile&&fertile.days.includes(ds))cls+=' fertile';
+    if(ds===today())cls+=' today';
+    cells+=`<div class="${cls}">${d}</div>`;
+  }
+  $('calDays').innerHTML=cells;
+}
+const TIPS=[
+ "Day 1: Cramps often peak today — a warm compress and some rest can help.",
+ "Day 2: Stay hydrated and add iron-rich foods like spinach or lentils to help replenish what's lost.",
+ "Day 3: Gentle movement — a short walk or light stretching — can ease bloating and mood dips.",
+ "Day 4: Her body is still recovering — extra sleep and going easy on plans helps.",
+ "Day 5: Flow is usually lighter now — a good time to note how this cycle felt, for the records."
+];
+const GENERAL_WOMEN_TIPS=[
+ "Track more than dates — noting mood, flow, and energy each cycle helps spot patterns worth mentioning to a doctor.",
+ "Iron-rich foods (leafy greens, lentils, lean meat) help the body recover, especially after heavier flow days.",
+ "Staying hydrated helps ease bloating and headaches around the cycle, not just during the period itself.",
+ "A regular sleep schedule helps balance the hormones that drive the whole cycle.",
+ "Sudden changes in cycle length or very heavy flow are worth mentioning at a regular check-up.",
+ "Pelvic or lower back pain that's new or unusually severe is worth getting checked, even outside period days.",
+ "Folic acid and a balanced diet support cycle health long before pregnancy is ever a consideration."
+];
+const PHASE_TIPS={
+ follicular:[
+  "Energy tends to rise in this phase — a good window for harder workouts or tackling bigger tasks.",
+  "Estrogen is climbing now, which often means better mood and focus — plan demanding work here if you can.",
+  "Protein and complex carbs support the body's natural energy build-up during this phase.",
+  "Skin often looks its best right now — a normal effect of rising estrogen, nothing to read into."
+ ],
+ fertile:[
+  "Mild one-sided pelvic twinges around now are common around ovulation and usually harmless.",
+  "Cervical discharge that's clearer and stretchier than usual is a normal ovulation sign.",
+  "Body temperature rises slightly after ovulation — normal, and the basis of temperature-based tracking.",
+  "This is typically the most fertile window in the cycle, worth knowing whether or not pregnancy is a goal."
+ ],
+ luteal:[
+  "PMS symptoms — mood dips, bloating, tender breasts — are common in this phase and usually ease once the period starts.",
+  "Cutting back on caffeine and salt in this phase can reduce bloating for some people.",
+  "Calcium and magnesium-rich foods (dairy, nuts, seeds) may help ease PMS cramps and mood swings.",
+  "Cravings often increase now — a normal hormonal effect, not a lack of willpower.",
+  "If a period feels late, this is the phase it would show up in — the countdown card above will flag it."
+ ]
+};
+function renderAdvice(){
+  let h=dates();
+  if(h.length<2){$('adviceCard').style.display='none';}
+  else{
+    let nextStr=predictedNext();
+    let daysLeft=daysBetween(today(),nextStr);
+    let fertile=fertileWindow();
+    let inFertile=fertile&&fertile.days.includes(today());
+    if(daysLeft>=0&&daysLeft<=2){
+      $('adviceCard').style.display='block';
+      $('adviceTitle').textContent=daysLeft===0?'🔔 Expected today':'🔔 Heads up — '+daysLeft+' day'+(daysLeft>1?'s':'')+' to go';
+      $('adviceText').textContent='Based on '+h.length+' logged cycles (avg '+avgCycleLength()+' days), her next period is expected around '+fmtLong(nextStr)+'. Good time to keep supplies, a heating pad, and pain relief on hand.';
+    }else if(inFertile){
+      $('adviceCard').style.display='block';
+      $('adviceTitle').textContent='🥚 Fertile window';
+      $('adviceText').textContent="She's in the estimated fertile window ("+fmtShort(fertile.start)+' – '+fmtShort(fertile.end)+"), based on a typical 14-day luteal phase. This is an estimate, not a guarantee.";
+    }else{
+      $('adviceCard').style.display='none';
+    }
+  }
+  let onPeriodTip=false;
+  if(h.length){
+    let lastEntry=entries()[entries().length-1];
+    let last=lastEntry.date;
+    let len=lastEntry.endDate?daysBetween(lastEntry.date,lastEntry.endDate)+1:5;
+    let dayIdx=daysBetween(last,today());
+    if(dayIdx>=0&&dayIdx<len){
+      onPeriodTip=true;
+      $('tipsCard').style.display='block';
+      $('tipsTitle').textContent='💡 Healthy tip — Day '+(dayIdx+1)+' of period';
+      $('tipText').textContent=TIPS[Math.min(dayIdx,TIPS.length-1)];
+    }
+  }
+  if(!onPeriodTip){
+    let dayIndex=Math.floor(Date.now()/86400000);
+    $('tipsCard').style.display='block';
+    if(h.length>1){
+      let last=h[h.length-1];let avg=avgCycleLength();let cycleDay=daysBetween(last,today())+1;
+      let lastEnt=entries()[entries().length-1];
+      let periodLen=lastEnt.endDate?daysBetween(lastEnt.date,lastEnt.endDate)+1:5;
+      let phase=cyclePhase(cycleDay,avg,periodLen);
+      let bank=GENERAL_WOMEN_TIPS,label='💡 Women\'s health tip';
+      if(phase.includes('Follicular')){bank=PHASE_TIPS.follicular;label='🌱 Follicular phase tip';}
+      else if(phase.includes('Fertile')){bank=PHASE_TIPS.fertile;label='🥚 Fertile window tip';}
+      else if(phase.includes('Luteal')){bank=PHASE_TIPS.luteal;label='🌙 Luteal phase tip';}
+      $('tipsTitle').textContent=label;
+      $('tipText').textContent=bank[dayIndex%bank.length];
+    }else{
+      $('tipsTitle').textContent='💡 Women\'s health tip';
+      $('tipText').textContent=GENERAL_WOMEN_TIPS[dayIndex%GENERAL_WOMEN_TIPS.length];
+    }
+  }
+  renderInsights(h);
+}
+function renderInsights(h){
+  if(h.length<2){$('insightsCard').style.display='none';return}
+  $('insightsCard').style.display='block';
+  let fertile=fertileWindow();
+  $('fertileText').textContent='Estimated fertile window (based on a typical 14-day luteal phase): '+fmtShort(fertile.start)+' – '+fmtShort(fertile.end)+'. This is an estimate, not a guarantee.';
+  let diffs=[];for(let i=1;i<h.length;i++)diffs.push(daysBetween(h[i-1],h[i]));
+  let recent=diffs.slice(-6);
+  let max=Math.max(...recent,1);
+  $('trendChart').innerHTML=recent.map(v=>`<div class="trend-bar" style="height:${Math.max(8,(v/max)*46)}px"><span class="lbl">${v}</span></div>`).join('');
+  let range=Math.max(...recent)-Math.min(...recent);
+  $('irregularText').textContent=range>7?('Cycle lengths have varied by up to '+range+' days recently — predictions may be less precise.'):'';
+}
+function renderPeriods(){
+  let h=dates();
+  if(!h.length){
+    $('cycleDay').textContent='–';$('cycleLabel').textContent='Log your last period to start tracking';
+    $('nextInfo').textContent='';$('pbar').style.width='0%';
+    $('avgLen').textContent='–';$('lastDate').textContent='–';$('phaseLabel').textContent='';
+  }else{
+    let last=h[h.length-1];let avg=avgCycleLength();let cycleDay=daysBetween(last,today())+1;
+    let nextStr=predictedNext();let daysLeft=daysBetween(today(),nextStr);
+    $('cycleDay').textContent=cycleDay;$('cycleLabel').textContent='day of cycle';
+    $('nextInfo').textContent=daysLeft>=0?('Next expected: '+fmtShort(nextStr)+' ('+daysLeft+'d)'):('Next expected: '+fmtShort(nextStr)+' (overdue '+(-daysLeft)+'d)');
+    $('pbar').style.width=Math.min(100,Math.max(0,(cycleDay/avg)*100))+'%';
+    $('avgLen').textContent=h.length>1?avg:'–';$('lastDate').textContent=fmtShort(last);
+    let lastEnt=entries()[entries().length-1];
+    let periodLen=lastEnt.endDate?daysBetween(lastEnt.date,lastEnt.endDate)+1:5;
+    $('phaseLabel').textContent=h.length>1?cyclePhase(cycleDay,avg,periodLen):'';
+  }
+  let ent=entries();
+  let withEnd=ent.filter(e=>e.endDate);
+  $('avgPeriodLen').textContent=withEnd.length?Math.round(withEnd.reduce((s,e)=>s+daysBetween(e.date,e.endDate)+1,0)/withEnd.length):'–';
+  $('plist').innerHTML=ent.length?ent.slice().reverse().map((e,i)=>{
+    let idx=ent.length-1-i;let prev=idx>0?ent[idx-1].date:null;
+    let cycleLen=prev?daysBetween(prev,e.date)+' day cycle':'first logged entry';
+    let periodLen=e.endDate?(daysBetween(e.date,e.endDate)+1)+'-day period ('+fmtShort(e.date)+'–'+fmtShort(e.endDate)+')':null;
+    let extra=(e.flow?e.flow+' flow':'')+(e.note?(e.flow?' · ':'')+esc(e.note):'');
+    let meta=[cycleLen,periodLen,extra].filter(Boolean).join(' · ');
+    return `<div class="entry"><div><div class="d">${fmtLong(e.date)}</div><div class="m">${meta}</div></div><div class="acts"><button class="icon" onclick="editPeriod('${e.date}')" aria-label="Edit entry from ${fmtLong(e.date)}">✏️</button><button class="icon" onclick="delPeriod('${e.date}')" aria-label="Delete entry from ${fmtLong(e.date)}">🗑️</button></div></div>`;
+  }).join(''):'<div class="empty"><b>No entries yet 🩸</b>Log your last period start date to begin tracking.</div>';
+  renderCalendar();renderAdvice();
+}
+function setFlowUI(f){selFlow=f||'Medium';document.querySelectorAll('#flowRow [data-flow]').forEach(b=>b.classList.toggle('active',b.dataset.flow===selFlow))}
+function openNewPeriod(){editingPeriod=null;$('pmodalTitle').textContent='Log period start';$('periodDateInput').value=today();$('periodEndInput').value='';$('periodNote').value='';setFlowUI('Medium');$('pmodal').style.display='flex'}
+function editPeriod(d){let e=pdata.history.find(x=>x.date===d);if(!e)return;editingPeriod=d;$('pmodalTitle').textContent='Edit period entry';$('periodDateInput').value=d;$('periodEndInput').value=e.endDate||'';$('periodNote').value=e.note||'';setFlowUI(e.flow||'Medium');$('pmodal').style.display='flex'}
+function closePeriodModal(){$('pmodal').style.display='none'}
+function savePeriodEntry(){
+  let d=$('periodDateInput').value||today();
+  let end=$('periodEndInput').value||'';
+  if(end&&end<d){alert('End date can\'t be before the start date.');return}
+  let note=$('periodNote').value.trim();
+  if(editingPeriod&&editingPeriod!==d)pdata.history=pdata.history.filter(x=>x.date!==editingPeriod);
+  pdata.history=pdata.history.filter(x=>x.date!==d);
+  pdata.history.push({date:d,endDate:end,flow:selFlow,note});
+  psave();closePeriodModal();renderPeriods();
+}
+function delPeriod(d){if(confirm('Delete this entry?')){pdata.history=pdata.history.filter(x=>x.date!==d);psave();renderPeriods()}}
+
+/* ---------- Backup / restore ---------- */
+function exportBackup(){
+  let payload={exportedAt:new Date().toISOString(),tasks,periods:pdata,habits};
+  let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='kee-reminder-backup-'+today()+'.json';a.click();
+}
+function importBackup(ev){
+  let file=ev.target.files[0];if(!file)return;
+  let reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      let data=JSON.parse(reader.result);
+      if(!confirm('This will replace all current tasks, habits, and period history with the backup file. Continue?'))return;
+      if(Array.isArray(data.tasks))localStorage.setItem(KEY,JSON.stringify(data.tasks));
+      if(data.periods&&Array.isArray(data.periods.history))localStorage.setItem(PKEY,JSON.stringify(data.periods));
+      if(Array.isArray(data.habits))localStorage.setItem(HKEY,JSON.stringify(data.habits));
+      location.reload();
+    }catch(e){alert('Could not read that file — is it a Kee Reminder backup?')}
+  };
+  reader.readAsText(file);
+  ev.target.value='';
+}
+
+/* ---------- Daily heads-up notification ---------- */
+function periodNotifyCheck(){
+  let h=dates();if(h.length<2)return;
+  let nextStr=predictedNext();let daysLeft=daysBetween(today(),nextStr);
+  if(daysLeft>=0&&daysLeft<=2&&pdata.lastNotified!==today()){
+    notify('Period tracker 🔔',daysLeft===0?'Her period is expected to start today.':'Her period is expected in '+daysLeft+' day'+(daysLeft>1?'s':'')+'.');
+    pdata.lastNotified=today();psave();
+  }
+}
+renderPeriods();
+periodNotifyCheck();
+
+/* ---------- Refresh Me: type it out, then release it ---------- */
+const CRISIS_WORDS=['suicide','kill myself','end my life','ending my life','want to die','wanna die',"don't want to live",'dont want to live','self harm','self-harm','hurt myself','no reason to live','better off dead','cant go on',"can't go on",'give up on everything','no point in living'];
+const ED_WORDS=['eating disorder','binge eating','purging','make myself throw up','bulimia','anorexi','starving myself',"can't stop eating",'hate my body so much','restrict my food','skip every meal','obsessed with calories'];
+const SAFETY_WORDS=['hits me','hit me','afraid of him','afraid of her','scared of my partner','scared of my husband','scared of my boyfriend',"won't let me leave",'controlling me','threatens me','abusive relationship','domestic violence','afraid to go home'];
+const CATEGORIES=[
+  {match:['deadline','boss','overtime','workload','presentation','exam','assignment','project due','meeting','fired','interview','work stress','too much work'],
+   sympathy:"That kind of pressure is exhausting — it makes sense this is sitting so heavy.",
+   solution:"Pick just the one smallest next step, not the whole thing. Everything else is allowed to wait until that one step is done."},
+  {match:['sleep','insomnia',"can't sleep",'cant sleep','tired','exhausted','awake all night','no rest','running on empty'],
+   sympathy:"Running on empty makes everything else feel so much harder than it actually is.",
+   solution:"Tonight, aim for a 10-minute wind-down instead of forcing sleep itself — dim the lights, put the phone down first."},
+  {match:['money','bills','rent','debt','broke','afford','loan','expensive','financ'],
+   sympathy:"Money stress has a way of following you into everything else. That weight is real.",
+   solution:"Write down only what's actually due this week — not the whole picture at once. One number is easier to face than all of them."},
+  {match:['fight with','argument','breakup','broke up','angry at','mad at','my partner','boyfriend','girlfriend','husband','wife','he ignores me','she ignores me'],
+   sympathy:"Conflict with someone you care about can sit heavy in your chest, even hours later.",
+   solution:"Give it a little time before you respond. Write down what you actually feel first — the reply can wait until you're calmer."},
+  {match:['lonely','alone','no one','isolated','no friends','left out','no one understands'],
+   sympathy:"Feeling alone in it is one of the hardest parts, even when people are technically around.",
+   solution:"Send one small message to one person today — it doesn't even have to be about this."},
+  {match:['anxious','anxiety','panic','overwhelmed','stressed','racing thoughts','cant breathe',"can't breathe",'spiraling'],
+   sympathy:"That overwhelmed feeling is just your mind trying to hold too many things at once.",
+   solution:"Try naming 5 things you can see, 4 you can hear, 3 you can touch. It brings you back to right now, one sense at a time."},
+  {match:['exam result','failed','failure','not good enough','mistake at work','messed up','screwed up','i suck at','i ruin everything'],
+   sympathy:"One setback can feel like it erases everything else you've done — but it doesn't.",
+   solution:"Write down one honest thing you'd tell a friend in your exact situation, then try believing it about yourself too."},
+  {match:['died','passed away','miss him so much','miss her so much','lost my','grieving','funeral','death of'],
+   sympathy:"Grief doesn't move in a straight line — it makes sense that it's surfacing again right now.",
+   solution:"There's nothing to fix here, only to feel. Let yourself sit with the memory for a moment instead of pushing it away."},
+  {match:['so angry','furious','pissed off','makes me so mad','rage','fed up with','sick of'],
+   sympathy:"Anger is usually a sign that something that matters to you got crossed. That's worth listening to.",
+   solution:"Let the heat move through you first — a walk, a hard exhale, even just this page — before you decide what to do with it."},
+  {match:['my fault',"i shouldn't have",'i feel so guilty','ashamed','embarrassed myself','i let everyone down','i let them down'],
+   sympathy:"Carrying guilt like that is heavy — and it's usually harsher on you than anyone else would be.",
+   solution:"Ask what you'd say to a friend who did the exact same thing. Chances are it's kinder than what you're telling yourself."},
+  {match:['everyone else seems','comparing myself','so jealous of','behind in life','falling behind','everyone is ahead of me','instagram makes me feel'],
+   sympathy:"Comparing your whole story to someone else's highlight reel almost never feels fair to you.",
+   solution:"Close the tab for now. The only pace that actually matters here is your own."},
+  {match:['my mom','my dad','my family','my parents',"my mother",'my father','sibling','my brother','my sister'],
+   sympathy:"Family stuff can hit differently — it's tangled up with a lot of history, not just today.",
+   solution:"You don't have to sort out the whole relationship right now. Just naming what's bothering you today is enough for this moment."},
+  {match:['miss home','homesick','new city','just moved','far from home','don\'t know anyone here','dont know anyone here'],
+   sympathy:"Being somewhere unfamiliar while everything you know is far away is genuinely disorienting.",
+   solution:"Do one small thing that feels like home today — a familiar song, a familiar meal, a call to someone who knows you well."},
+  {match:["can't decide",'cant decide','dont know what to do','don\'t know what to do','torn between','stuck between','which choice','overthinking this decision'],
+   sympathy:"Being stuck between options is its own kind of exhausting — your mind keeps replaying both sides.",
+   solution:"Ask which choice you'd regret not trying. That question usually cuts through the noise faster than listing pros and cons."},
+  {match:['burnt out','burned out','no motivation','nothing feels exciting','just going through the motions','numb lately','running on fumes'],
+   sympathy:"Burnout doesn't always look dramatic — sometimes it's just everything feeling flat and far away.",
+   solution:"Lower the bar today. Doing the smallest possible version of the next thing still counts as moving."},
+  {match:['in pain','my body hurts','headache','migraine','not feeling well','feel sick','in so much pain','body aches'],
+   sympathy:"Being in pain makes everything else feel harder to deal with too — that's not in your head.",
+   solution:"Give your body what it's actually asking for right now — water, rest, or just permission to slow down."},
+  {match:['my kids','my child','my baby','taking care of','caregiving','my parents are sick','looking after'],
+   sympathy:"Taking care of someone else while running low yourself is one of the hardest balancing acts there is.",
+   solution:"You're allowed to need care too, even while you're the one giving it. Ask for five minutes of help from someone today."},
+  {match:['what am i doing with my life','no direction','dont know who i am',"don't know who i am",'lost sense of purpose','feel stuck in life'],
+   sympathy:"That kind of uncertainty about the bigger picture can feel unsettling in a quiet, persistent way.",
+   solution:"You don't need the whole answer today. Just notice one thing that felt right recently — that's a thread worth following."},
+  {match:['plans fell through','got cancelled','so disappointed','let down','didnt work out',"didn't work out",'ruined my day'],
+   sympathy:"When something you were counting on falls apart, the letdown is real, even if it seems small from the outside.",
+   solution:"Let yourself be annoyed about it for a minute. Then pick one small thing today that's still within your control."},
+  {match:['so bored','nothing to do','same routine','stuck in a rut','every day feels the same'],
+   sympathy:"A flat, repetitive stretch of days can wear on you just as much as a hard one can.",
+   solution:"Change one small variable today — a different route, a new song, anything that breaks the pattern a little."},
+  {match:['nervous about','big day tomorrow','presentation tomorrow','first day','interview tomorrow','worried about tomorrow'],
+   sympathy:"That pre-big-moment nervous energy is uncomfortable, but it's usually a sign you care about how it goes.",
+   solution:"Picture the very first small step tomorrow, not the whole day. That's the only part you need to handle right now."},
+  {match:['grateful','proud of myself','good day','excited about','feeling happy','went really well','so relieved','finally did it'],
+   positive:true,
+   sympathy:"That's genuinely worth pausing on for a second — good moments deserve to be noticed, not just rushed past.",
+   solution:"Write down one specific detail of it somewhere you'll see again — future you will appreciate the reminder."}
+];
+const FALLBACK_SHORT=[
+  "Short and honest — sometimes that's all there is to say, and that's fine.",
+  "Whatever that was, it's out now. You don't have to explain it further.",
+  "That's enough for right now. Not everything needs more words.",
+  "Noted, and let go. You're allowed to leave it there."
+];
+const FALLBACK_LONG=[
+  "You showed up and named it. That's the hard part, and you already did it.",
+  "This doesn't have to be solved right now. You're allowed to just breathe.",
+  "Whatever it is, it doesn't define your whole day. One step at a time.",
+  "You've gotten through hard days before. This one is no different.",
+  "It's okay to not have the answer yet. Clarity comes after calm, not before it.",
+  "You did something kind for yourself just now, just by writing it down.",
+  "Small steps still count as moving forward.",
+  "You're not behind. You're exactly where you need to be to start again.",
+  "This feeling is real, but it isn't permanent.",
+  "Take a slow breath in, and a slower one out. That's a fair goal for right now.",
+  "You are allowed to rest before you figure it out."
+];
+function scoreMatch(lower,keywords){
+  let score=0;
+  for(const k of keywords)if(lower.includes(k))score+=k.includes(' ')?2:1;
+  return score;
+}
+function checkCrisis(text){
+  let lower=text.toLowerCase();
+  for(const w of CRISIS_WORDS)if(lower.includes(w))return{crisis:true,kind:'crisis',
+    sympathy:"That sounds incredibly heavy to be carrying — thank you for putting it into words instead of holding it alone.",
+    solution:"Please reach out to someone right now — a person you trust, or a crisis line (in the US, call or text 988; elsewhere, your local emergency number). You don't have to get through this by yourself."};
+  for(const w of SAFETY_WORDS)if(lower.includes(w))return{crisis:true,kind:'safety',
+    sympathy:"What you're describing sounds frightening, and it matters — you deserve to feel safe.",
+    solution:"If you're in immediate danger, please call 911 or your local emergency number. The National Domestic Violence Hotline is free and confidential: call 1-800-799-7233 or text START to 88788."};
+  for(const w of ED_WORDS)if(lower.includes(w))return{crisis:true,kind:'ed',
+    sympathy:"Thank you for putting this into words — that's not an easy thing to write down.",
+    solution:"Please consider reaching out to the National Alliance for Eating Disorders helpline: call 1-866-662-1235 (Mon–Fri, 9am–7pm ET). If it feels urgent, 988 is available 24/7."};
+  return null;
+}
+function localAdvice(text){
+  let lower=text.toLowerCase();
+  let best=null,bestScore=0;
+  for(const cat of CATEGORIES){
+    let s=scoreMatch(lower,cat.match);
+    if(s>bestScore){bestScore=s;best=cat;}
+  }
+  if(best)return{crisis:false,kind:best.positive?'positive':'normal',sympathy:best.sympathy,solution:best.solution};
+  let pool=text.trim().length<40?FALLBACK_SHORT:FALLBACK_LONG;
+  return{crisis:false,kind:'normal',sympathy:pool[Math.floor(Math.random()*pool.length)],solution:null};
+}
+function pickResponse(text){return checkCrisis(text)||localAdvice(text)}
+
+/* ---------- Optional AI advice (bring-your-own Anthropic API key) ---------- */
+const AI_KEY_STORE='kee_ai_key_v1';
+let AI_KEY='';
+try{AI_KEY=localStorage.getItem(AI_KEY_STORE)||''}catch(e){}
+updateAIStatus();
+function updateAIStatus(){
+  let el=$('aiStatusLine');if(!el)return;
+  el.textContent=AI_KEY?'✨ AI advice is on for Refresh Me':'💾 Offline responses only — tap ⚙️ to add AI advice';
+}
+function openAISettings(){
+  $('aiKeyInput').value=AI_KEY;
+  let remembered=false;try{remembered=!!localStorage.getItem(AI_KEY_STORE)}catch(e){}
+  $('aiKeyRemember').checked=remembered;
+  $('aimodal').style.display='flex';
+}
+function closeAISettings(){$('aimodal').style.display='none'}
+function saveAIKey(){
+  let k=$('aiKeyInput').value.trim();
+  AI_KEY=k;
+  try{
+    if($('aiKeyRemember').checked&&k)localStorage.setItem(AI_KEY_STORE,k);
+    else localStorage.removeItem(AI_KEY_STORE);
+  }catch(e){}
+  updateAIStatus();closeAISettings();
+}
+function clearAIKey(){
+  AI_KEY='';
+  try{localStorage.removeItem(AI_KEY_STORE)}catch(e){}
+  $('aiKeyInput').value='';$('aiKeyRemember').checked=false;
+  updateAIStatus();
+}
+async function callAI(text){
+  const sys="You are a warm, concise, emotionally supportive companion inside a personal journaling feature called Refresh Me. The user just typed something they wanted to get off their chest. Give realistic, specific, genuinely useful support — grounded in what they actually wrote, not generic platitudes. The user may write in English, in a regional Indian language's script, or in Romanized/transliterated form (e.g. Tanglish — Tamil written in English letters, or similar Hinglish/Manglish-style mixes). Understand it regardless of script or transliteration, and reply in the same language and style they used — if they wrote in Tanglish, reply in warm, natural Tanglish; if English, reply in English. Reply with ONLY a JSON object, no markdown fences, no extra text: {\"sympathy\":\"1-2 warm sentences that reflect their specific situation in your own words, in their language/style\",\"solution\":\"one concrete, realistic next step or reframe specific to their situation, in their language/style, or an empty string if none fits\",\"positive\":true or false — true only if what they wrote is a good/happy moment rather than a stressor}. Never diagnose, never mention you're an AI, never quote their message back verbatim. Keep the combined reply under 70 words. If the message describes any risk of suicide, self-harm, abuse, or an eating disorder, instead reply with {\"sympathy\":\"a brief caring acknowledgment, in their language/style\",\"solution\":\"a gentle suggestion to reach out to a trusted person or a professional, in their language/style\",\"positive\":false} — do not give a solution that discourages seeking help.";
+  const controller=new AbortController();
+  const to=setTimeout(()=>controller.abort(),20000);
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'content-type':'application/json',
+        'x-api-key':AI_KEY,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({model:'claude-sonnet-5',max_tokens:300,system:sys,messages:[{role:'user',content:text}]}),
+      signal:controller.signal
+    });
+    clearTimeout(to);
+    if(!res.ok)throw new Error('AI request failed: '+res.status);
+    const data=await res.json();
+    const raw=(data.content||[]).map(b=>b.text||'').join('').trim();
+    const cleaned=raw.replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    const parsed=JSON.parse(cleaned);
+    if(!parsed.sympathy)throw new Error('Empty AI response');
+    return{crisis:false,kind:parsed.positive?'positive':'normal',sympathy:parsed.sympathy,solution:parsed.solution||null};
+  }catch(err){clearTimeout(to);throw err}
+}
+async function getResponse(text){
+  let crisis=checkCrisis(text);
+  if(crisis)return crisis;
+  if(AI_KEY){
+    try{return await callAI(text)}
+    catch(err){let fb=localAdvice(text);fb.aiFailed=true;return fb}
+  }
+  return localAdvice(text);
+}
+let trashItems=[],trashOpen=false;
+function renderTrash(){
+  $('trashBox').innerHTML=trashItems.map(it=>'<div class="trash-item" style="padding:8px 0;border-bottom:1px solid #edf0f4;white-space:pre-wrap">'+
+    '<div class="small" style="color:var(--muted);margin-bottom:3px">'+esc(it.time)+'</div>'+esc(it.text)+'</div>').join('')||'<div class="empty">Nothing here right now.</div>';
+}
+const BURN_TOTAL_MS=10000;
+async function releaseRefresh(){
+  let box=$('refreshInput');
+  let text=box.value.trim();
+  if(!text){box.focus();return}
+  let flameHost=$('flames'),overlay=$('burnOverlay'),btn=$('refreshBtn');
+  btn.disabled=true;btn.textContent='🔥 Releasing…';
+  let lines=text.split('\n');
+  overlay.innerHTML='';
+  let lineEls=lines.map(ln=>{
+    let d=document.createElement('div');d.className='burn-line';d.textContent=ln.length?ln:'\u00A0';
+    overlay.appendChild(d);return d;
+  });
+  overlay.classList.add('active');
+  box.classList.add('hidden-for-burn');
+
+  let n=lineEls.length;
+  let dur=n<=1?BURN_TOTAL_MS:Math.max(900,Math.min(2400,BURN_TOTAL_MS/n*1.5));
+  let stagger=n<=1?0:(BURN_TOTAL_MS-dur)/(n-1);
+  let overlayW=overlay.clientWidth||300;
+
+  lineEls.forEach((el,i)=>{
+    let startAt=i*stagger;
+    setTimeout(()=>{
+      el.style.animationDuration=dur+'ms';
+      el.classList.add('burning');
+      for(let k=0;k<3;k++){
+        let f=document.createElement('span');f.className='flame-particle';f.textContent='🔥';
+        f.style.left=(4+Math.random()*(overlayW-24))+'px';
+        f.style.top=(el.offsetTop+6)+'px';
+        f.style.animationDelay=(Math.random()*0.3)+'s';
+        f.style.fontSize=(13+Math.random()*12)+'px';
+        flameHost.appendChild(f);
+      }
+    },startAt);
+  });
+
+  await new Promise(res=>setTimeout(res,BURN_TOTAL_MS+150));
+  box.value='';box.classList.remove('hidden-for-burn');
+  overlay.classList.remove('active');overlay.innerHTML='';
+  flameHost.innerHTML='';
+  trashItems.unshift({text:text,time:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});
+  if(trashItems.length>10)trashItems.length=10;
+  $('trashSection').style.display='block';
+  $('trashLabel').textContent='🗑️ Trashed ('+trashItems.length+') — tap to see what you released';
+  renderTrash();
+  $('trashBox').style.display=trashOpen?'block':'none';$('trashChevron').textContent=trashOpen?'▴':'▾';
+  $('trashClearBtn').style.display=trashOpen?'inline-block':'none';
+
+  btn.textContent=AI_KEY?'🤔 Thinking…':'🔥 Releasing…';
+  let r=await getResponse(text);
+  btn.disabled=false;btn.textContent='🔥 Release it';
+
+  $('refreshResult').classList.toggle('crisis',r.crisis);
+  let titles={crisis:'💛 You are not alone',safety:'💛 Your safety matters',ed:'💛 You are not alone',positive:'🌟 Worth holding onto',normal:'✨ Now breathe'};
+  $('refreshTitle').textContent=titles[r.kind]||'✨ Now breathe';
+  $('refreshSympathy').textContent=r.sympathy;
+  $('refreshSolution').style.display=r.solution?'block':'none';
+  $('refreshSolution').textContent=r.solution||'';
+  $('refreshFallbackNote').style.display=r.aiFailed?'block':'none';
+  $('refreshResult').style.display='block';
+  $('refreshResult').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function toggleTrash(){
+  trashOpen=!trashOpen;
+  $('trashBox').style.display=trashOpen?'block':'none';
+  $('trashChevron').textContent=trashOpen?'▴':'▾';
+  $('trashClearBtn').style.display=trashOpen?'inline-block':'none';
+}
+function emptyTrash(){
+  trashItems=[];$('trashBox').innerHTML='';$('trashBox').style.display='none';
+  $('trashSection').style.display='none';$('trashClearBtn').style.display='none';trashOpen=false;
+}
+function closeRefreshResult(){$('refreshResult').style.display='none'}
+
+
+let deferredInstall=null;
+const installBtn=document.getElementById('installBtn');
+const installBanner=document.getElementById('installBanner');
+const installNow=document.getElementById('installNow');
+const installClose=document.getElementById('installClose');
+function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault(); deferredInstall=e; if(!isStandalone()){installBtn.style.display='block';installBanner.classList.add('show');}});
+installBtn?.addEventListener('click',()=>installNow?.click());
+installNow?.addEventListener('click',async()=>{if(!deferredInstall){alert('To install: open this app from its HTTPS website in Chrome, then choose ⋮ → Add to Home screen → Install app.');return}deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;installBanner.classList.remove('show');installBtn.style.display='none'});
+installClose?.addEventListener('click',()=>installBanner.classList.remove('show'));
+window.addEventListener('appinstalled',()=>{installBanner.classList.remove('show');installBtn.style.display='none'});
+</script>
+</body></html>
